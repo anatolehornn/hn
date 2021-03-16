@@ -1,65 +1,54 @@
 import Head from 'next/head'
+import { useState, useEffect } from 'react';
+import DOMPurify from 'dompurify'
+
 import styles from '../styles/Home.module.css'
 
 export default function Home() {
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+  const [data, setData] = useState(null);
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+  async function fetchData() {
+    const response = await fetch('/api/hello');
+    const json = await response.json();
+    setData(json);
+  }
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+  useEffect(() => {fetchData()},['/api/hello']);
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+  if (!data) {
+    return <div>Loading...</div>;
+  } else {
+    return (
+      <div className={styles.container}>
+        {data &&
+          <div className="main-wrapper">
+            <main className={styles.main}>
+              <div className="page-content">
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+                <h1 className={styles.title}>
+                  {data.title}
+                </h1>
+                <div><img src={data.mainImage}/></div>
+                <div class="profile_layout">
+                  <img src={data.profile.avatar} className="avatar" width="50" height="50"/>
+                  <div>
+                    <a href={'https://hackernoon.com/u/'+data.profile.handle} className="handle">@{data.profile.handle}</a>
+                    <div class="adLink">{data.profile.adLink}</div>
+                    <div class="displayName">{data.profile.displayName}</div>
+                    <div className="bio">{data.profile.bio}</div>
+                    <div className="github">{data.profile.github}</div>
+                    <div className="twitter">{data.profile.twitter}</div>
+                  </div>
+                </div>
+                <div className="content_layout">
+                  <div dangerouslySetInnerHTML={{__html: data.markup}}></div>
+                </div>
+              </div>
 
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+            </main>
+          </div>
+        }
+      </div>
+    )
+  }
 }
